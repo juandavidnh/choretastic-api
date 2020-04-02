@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS choretastic_homes;
+DROP TABLE IF EXISTS choretastic_homes CASCADE;

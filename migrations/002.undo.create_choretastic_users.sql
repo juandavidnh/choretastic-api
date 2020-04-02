@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS coretastic_users;
+DROP TABLE IF EXISTS choretastic_users;

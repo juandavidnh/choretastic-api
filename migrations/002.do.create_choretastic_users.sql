@@ -6,7 +6,7 @@ CREATE TABLE choretastic_users (
     last_name TEXT NOT NULL,
     nickname TEXT,
     points INTEGER DEFAULT 0 NOT NULL,
-    home_id INTEGER NOT NULL
+    home_id INTEGER
         REFERENCES choretastic_homes(id) ON DELETE SET NULL,
     date_created TIMESTAMP NOT NULL DEFAULT now()
 );

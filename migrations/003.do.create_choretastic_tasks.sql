@@ -7,8 +7,8 @@ CREATE TABLE choretastic_tasks (
     status STATUS NOT NULL DEFAULT 'pending',
     date_created TIMESTAMP NOT NULL DEFAULT now(),
     date_completed TIMESTAMP,
-    assignee_id INTEGER NOT NULL
+    assignee_id INTEGER 
         REFERENCES choretastic_users(id) ON DELETE SET NULL,
-    home_id INTEGER NOT NULL
+    home_id INTEGER 
         REFERENCES choretastic_homes(id) ON DELETE SET NULL
 );
