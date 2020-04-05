@@ -1,12 +1,14 @@
 const express = require('express')
 const path = require('path')
 const HomesService = require('./homes-service')
+const { requireAuthUserHome } = require('../middleware/jwt-auth-user')
 
 const homesRouter = express.Router()
 const jsonBodyParser = express.json()
 
 homesRouter
     .route('/')
+    .all(requireAuthUserHome)
     .get((req, res, next) => {
         HomesService.getAllHomes(req.app.get('db'))
             .then(homes => {
@@ -17,6 +19,9 @@ homesRouter
             })
             .catch(next)
     })
+
+homesRouter
+    .route('/')
     .post(jsonBodyParser, (req, res, next) => {
         const { home_name, password } = req.body
 
@@ -67,62 +72,75 @@ homesRouter
             .catch(next)
     })
 
-    homesRouter
-        .route('/:id')
-        .all((req, res, next) => {
-            HomesService.getById(
-                req.app.get('db'),
-                req.params.id
-            )
-                .then(home => {
-                    if(!home){
-                        return res.status(400).json({
-                            error: {message: `Home doesn't exist`}
-                        })
-                    }
-                    res.home = home;
-                    next();
-                })
-                .catch(next)
-        })
-        .get((req, res, next) => {
-            res.json(HomesService.serializeHome(res.home))
-        })
-        .patch(jsonBodyParser, (req, res, next) => {
-            const { home_name, password } = req.body
-            const updateToHome = { home_name, password  }
+homesRouter
+    .route('/:id')
+    .all(requireAuthUserHome)
+    .all((req, res, next) => {
+        HomesService.getById(
+            req.app.get('db'),
+            req.params.id
+        )
+            .then(home => {
+                if(!home){
+                    return res.status(400).json({
+                        error: {message: `Home doesn't exist`}
+                    })
+                }
+                res.home = home;
+                next();
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        res.json(HomesService.serializeHome(res.home))
+    })
+    .patch(jsonBodyParser, (req, res, next) => {
+        const { home_name, password } = req.body
 
-            const numberOfValues = Object.values(updateToHome).filter(Boolean).length
+        const passwordError = HomesService.validatePassword(password)
 
-            if(numberOfValues === 0){
-                return res.status(400).json({
+        if(passwordError){
+            return res.status(400).json({error: passwordError})
+        }
+
+        HomesService.hashPassword(password)
+            .then(hashedPassword => {
+                const updateToHome = {
+                    home_name,
+                    password: hashedPassword,
+                }
+
+                const numberOfValues = Object.values(updateToHome).filter(Boolean).length
+                if(numberOfValues === 0) {
+                    return res.status(400).json({
                     error: {
                         message: `Request must contain at least one value to update`
-                    }
-                })
-            }
+                        }
+                    })
+                }
 
-            HomesService.updateHome(
-                req.app.get('db'),
-                req.params.id,
-                updateToHome
-            )
+                return HomesService.updateHome(
+                    req.app.get('db'),
+                    req.params.id,
+                    updateToHome
+                )
                 .then(() => {
                     res.status(204).end()
                 })
-                .catch(next)
-        })
-        .delete((req, res, next) => {
-            HomesService.deleteHome(
-                req.app.get('db'),
-                req.params.id
-            )
-                .then(() => {
-                    res.status(204).end()
-                })
-                .catch(next)
-        })
+            })
+            .catch(next)
+    })
+    .delete((req, res, next) => {
+        HomesService.deleteHome(
+            req.app.get('db'),
+            req.params.id
+        )
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 
 
 
-    module.exports = homesRouter
+module.exports = homesRouter

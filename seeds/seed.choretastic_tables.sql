@@ -8,22 +8,22 @@ TRUNCATE
 
 INSERT INTO choretastic_homes (home_name, password)
 VALUES
-    ('Los Gatos', 'gatos_password'),
-    ('Los Perros', 'perros_password'),
-    ('Las Ratas', 'ratas_password');
+    ('Los Gatos', '$2a$12$r7Dui4oHzQZetu648IAszuaB1KLin7uQ81n.Q5NKwm72dQs2.wnVC'),
+    ('Los Perros', '$2a$12$.bMYc5dqua2b2azMGxeTvOJ01OP.zSNEByca44LY/cRR3yj7l7Am.'),
+    ('Las Ratas', '$2a$12$55iYTTDXiJDcQmVGQFaOQuRKmNkBIC1EkS6awzNZpc4YoHPgRk5KK');
 
 INSERT INTO choretastic_users (email, password, first_name, last_name, nickname, points, home_id)
 VALUES
-    ('jd@choretastic.com', 'jd-password', 'Juan', 'Nunez', 'Juanpavip', 30, 1),
-    ('mashua@choretastic.com', 'mashua-password', 'Mashua', 'Ninini', 'Shakmua', 50, 1),
-    ('paco@choretastic.com', 'paco-password', 'Paco', 'Coco', 'Paquito', 40, 1),
-    ('lola@choretastic.com', 'lola-password', 'Lola', 'Gata', 'Lolita', 20, 2),
-    ('said@choretastic.com', 'said-password', 'Said', 'Hurtado', 'Estropajo', 60, 2),
-    ('capuli@choretastic.com', 'capuli-password', 'Capuli', 'Llata', 'Papupapu', 10, 2),
-    ('ivanka@choretastic.com', 'ivanka-password', 'Ivanka', 'Zauria', 'Buanabana', 70, 2),
-    ('pimienka@choretastic.com', 'pimienka-password', 'Pimienka', 'Paca', 'Lola', 13, 3),
-    ('frank@choretastic.com', 'frank-password', 'Frank', 'Nunez', 'Franklon', 57, 3),
-    ('lorenga@choretastic.com', 'lorenga-password', 'Lorenga', 'Mama de Said', 'Lorenga', 21, 3);
+    ('jd@choretastic.com', '$2a$12$Gyv4dTZ5Gm3W7sSmGqjRC.dT681fbCnv3HvrtuX8eYQast4iSOL16', 'Juan', 'Nunez', 'Juanpavip', 30, 1),
+    ('mashua@choretastic.com', '$2a$12$jmdRvAV4MaPd7I15E1A4G.aaMlFcXdZ9DRpEy5/ZvQmrJdfIAFIGC', 'Mashua', 'Ninini', 'Shakmua', 50, 1),
+    ('paco@choretastic.com', '$2a$12$9BQ6lP.A1SjKt7SDUMbTU.19jkaRTn71TsCWYzrVfYN6olb7iVFa.', 'Paco', 'Coco', 'Paquito', 40, 1),
+    ('lola@choretastic.com', '$2a$12$o7OBjReJfzqGdrlKm3SfkuCRfca0BfMPpqB/TtxyCYsanEfR6AYpi', 'Lola', 'Gata', 'Lolita', 20, 2),
+    ('said@choretastic.com', '$2a$12$cxH/df2acH45NNZFfrVWouyNeXxUlqO4soB7blDmZlTSBECyzYztW', 'Said', 'Hurtado', 'Estropajo', 60, 2),
+    ('capuli@choretastic.com', '$2a$12$UzhHBfCGf2Dw2q3YPD.jJOIdgpsKJnYM42Dm6patl1Kh8riE0RI0S', 'Capuli', 'Llata', 'Papupapu', 10, 2),
+    ('ivanka@choretastic.com', '$2a$12$Jn6OG7OvrxaRVs3VJ9Fs8.JtHXnviTY9QtQ37Qi68hYIAC6FVxAxW', 'Ivanka', 'Zauria', 'Buanabana', 70, 2),
+    ('pimienka@choretastic.com', '$2a$12$iU1HMOhcljhGafVABr/vP.R6HrMNzWsdgUREe8fHv/Yx7/yERoKgu', 'Pimienka', 'Paca', 'Lola', 13, 3),
+    ('frank@choretastic.com', '$2a$12$vNv.WzQvGDJALwz6kPUkKeugAsP51VT9gskZR./gB1lXzVrd4fzD2', 'Frank', 'Nunez', 'Franklon', 57, 3),
+    ('lorenga@choretastic.com', '$2a$12$53lUGNUCxi6k8KzKmh6J/eYhdZjYPkhxxl3tEYTaiLVb7l0BUg.Vm', 'Lorenga', 'Mama de Said', 'Lorenga', 21, 3);
 
 INSERT INTO choretastic_tasks (task_name, points, status, assignee_id, home_id)
 VALUES

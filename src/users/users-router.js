@@ -1,12 +1,14 @@
 const express = require('express')
 const path = require('path')
 const UsersService = require('./users-service')
+const { requireAuthUserHome, requireAuthUserOnly } = require('../middleware/jwt-auth-user')
 
 const usersRouter = express.Router()
 const jsonBodyParser = express.json()
 
 usersRouter
     .route('/')
+    .all(requireAuthUserHome)
     .get((req, res, next) => {
         UsersService.getAllUsers(req.app.get('db'))
             .then(users => {
@@ -17,6 +19,9 @@ usersRouter
             })
             .catch(next)
     })
+
+usersRouter
+    .route('/')
     .post(jsonBodyParser, (req, res, next) => {
         const { email, password, first_name, last_name, nickname } = req.body
 
@@ -70,63 +75,98 @@ usersRouter
             .catch(next)
     })
 
-    usersRouter
-        .route('/:id')
-        .all((req, res, next) => {
-            UsersService.getById(
-                req.app.get('db'),
-                req.params.id
-            )
-                .then(user => {
-                    if(!user){
-                        return res.status(400).json({
-                            error: {message: `User doesn't exist`}
-                        })
-                    }
-                    res.user = user;
-                    next();
-                })
-                .catch(next)
-        })
-        .get((req, res, next) => {
-            res.json(UsersService.serializeUser(res.user))
-        })
-        .patch(jsonBodyParser, (req, res, next) => {
-            const { email, password, first_name, last_name, nickname } = req.body
-            const home_id = parseInt(req.body.home_id)
-            const updateToUser = { email, password, first_name, last_name, nickname, home_id }
+usersRouter
+    .route('/:id')
+    .all(requireAuthUserOnly)
+    .all((req, res, next) => {
+        UsersService.getById(
+            req.app.get('db'),
+            req.params.id
+        )
+            .then(user => {
+                if(!user){
+                    return res.status(400).json({
+                        error: {message: `User doesn't exist`}
+                    })
+                }
+                res.user = user;
+                next();
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        res.json(UsersService.serializeUser(res.user))
+    })
+    .patch(jsonBodyParser, (req, res, next) => {
+        const { email, password, first_name, last_name, nickname, home_id } = req.body
 
-            const numberOfValues = Object.values(updateToUser).filter(Boolean).length
+        const passwordError = UsersService.validatePassword(password)
 
-            if(numberOfValues === 0){
-                return res.status(400).json({
+        if(passwordError){
+            return res.status(400).json({error: passwordError})
+        }
+
+        UsersService.hashPassword(password)
+            .then(hashedPassword => {
+                const updateToUser = {
+                    email,
+                    password: hashedPassword,
+                    first_name,
+                    last_name,
+                    nickname,
+                    home_id
+                }
+
+                const numberOfValues = Object.values(updateToUser).filter(Boolean).length
+                if(numberOfValues === 0) {
+                    return res.status(400).json({
                     error: {
                         message: `Request must contain at least one value to update`
-                    }
-                })
-            }
+                        }
+                    })
+                }
 
-            UsersService.updateUser(
-                req.app.get('db'),
-                req.params.id,
-                updateToUser
-            )
+                return UsersService.updateUser(
+                    req.app.get('db'),
+                    req.params.id,
+                    updateToUser
+                )
                 .then(() => {
                     res.status(204).end()
                 })
-                .catch(next)
-        })
-        .delete((req, res, next) => {
-            UsersService.deleteUser(
-                req.app.get('db'),
-                req.params.id
-            )
-                .then(() => {
-                    res.status(204).end()
-                })
-                .catch(next)
-        })
+            })
+            .catch(next)
+    })
+
+usersRouter
+    .route('/:id')
+    .all(requireAuthUserHome)
+    .all((req, res, next) => {
+        UsersService.getById(
+            req.app.get('db'),
+            req.params.id
+        )
+            .then(user => {
+                if(!user){
+                    return res.status(400).json({
+                        error: {message: `User doesn't exist`}
+                    })
+                }
+                res.user = user;
+                next();
+            })
+            .catch(next)
+    })
+    .delete((req, res, next) => {
+        UsersService.deleteUser(
+            req.app.get('db'),
+            req.params.id
+        )
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 
 
-
-    module.exports = usersRouter
+module.exports = usersRouter

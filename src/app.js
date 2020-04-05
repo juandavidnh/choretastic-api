@@ -4,11 +4,11 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV, CLIENT_ORIGIN } = require('./config')
-//const tasksRouter = require('./tasks/tasks-router')
+const tasksRouter = require('./tasks/tasks-router')
 const homesRouter = require('./homes/homes-router')
 const usersRouter = require('./users/users-router')
-//const authRouter = require('./auth/auth-router')
-//const authHomesRouter = require('./auth-homes/auth-homes-router')
+const authUserRouter = require('./auth/auth-user-router')
+const authHomeRouter = require('./auth/auth-home-router')
 
 const app = express()
 
@@ -22,10 +22,10 @@ app.use(cors({
     origin: CLIENT_ORIGIN
 }))
 
-//app.use('/api/tasks', tasksRouter)
-//app.use('/api/auth-homes', authHomesRouter)
+app.use('/api/tasks', tasksRouter)
 app.use('/api/homes', homesRouter)
-//app.use('/api/auth', authRouter)
+app.use('/api/auth-user', authUserRouter)
+app.use('/api/auth-home', authHomeRouter)
 app.use('/api/users', usersRouter)
 
 app.get('/', (req, res) => {
