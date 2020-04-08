@@ -78,6 +78,13 @@ const UsersService = {
             date_created: new Date(user.date_created),
         }
     },
+
+    getUsersFromHome(db, home_id) {
+        return db
+            .from('choretastic_users')
+            .select('*')
+            .where('home_id', home_id)
+    }
 }
 
 module.exports = UsersService

@@ -54,6 +54,20 @@ const TasksService = {
             date_completed: new Date(task.date_completed),
         }
     },
+
+    getTasksFromUser(db, user_id){
+        return db
+            .from('choretastic_tasks')
+            .select('*')
+            .where('assignee_id', user_id)
+    },
+
+    getTasksFromHome(db, home_id){
+        return db
+            .from('choretastic_tasks')
+            .select('*')
+            .where(home_id)
+    }
 }
 
 module.exports = TasksService

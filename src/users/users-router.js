@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const UsersService = require('./users-service')
+const AuthService = require('../auth/auth-service')
 const { requireAuthUserHome, requireAuthUserOnly } = require('../middleware/jwt-auth-user')
 
 const usersRouter = express.Router()
@@ -10,14 +11,37 @@ usersRouter
     .route('/')
     .all(requireAuthUserHome)
     .get((req, res, next) => {
-        UsersService.getAllUsers(req.app.get('db'))
+        const authToken = req.get('Authorization') || ''
+
+        let bearerToken
+        if(!authToken.toLowerCase().startsWith('bearer ')) {
+            return res.status(401).json({ error: 'Missing bearer token'})
+        } else {
+            bearerToken = authToken.slice(7, authToken.length)
+        }
+
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithEmail(
+            req.app.get('db'), 
+            payload.sub
+        )
+        .then(user => {
+            if(!user){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } else if(user.home_id == null ){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } 
+
+            return UsersService.getUsersFromHome(req.app.get('db'), user.home_id)
             .then(users => {
                 if(users.length < 1){
                     return res.status(204).end()
                 }
                 res.json(users.map(user => UsersService.serializeUser(user)))
             })
-            .catch(next)
+        })
+        .catch(next)
     })
 
 usersRouter
