@@ -1,7 +1,7 @@
 const express = require('express')
 const path = require('path')
 const HomesService = require('./homes-service')
-const { requireAuthUserHome } = require('../middleware/jwt-auth-user')
+const { requireAuthUserHome, requireAuthUserOnly } = require('../middleware/jwt-auth-user')
 
 const homesRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -22,6 +22,7 @@ homesRouter
 
 homesRouter
     .route('/')
+    .all(requireAuthUserOnly)
     .post(jsonBodyParser, (req, res, next) => {
         const { home_name, password } = req.body
 

@@ -1,6 +1,8 @@
 const express = require('express')
 const path = require('path')
 const TasksService = require('./tasks-service')
+const AuthService = require('../auth/auth-service')
+const UsersService = require('../users/users-service')
 const { requireAuthUserHome } = require('../middleware/jwt-auth-user')
 
 const tasksRouter = express.Router()
@@ -10,14 +12,37 @@ tasksRouter
     .route('/')
     .all(requireAuthUserHome)
     .get((req, res, next) => {
-        TasksService.getAllTasks(req.app.get('db'))
+        const authToken = req.get('Authorization') || ''
+
+        let bearerToken
+        if(!authToken.toLowerCase().startsWith('bearer ')) {
+            return res.status(401).json({ error: 'Missing bearer token'})
+        } else {
+            bearerToken = authToken.slice(7, authToken.length)
+        }
+
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithEmail(
+            req.app.get('db'), 
+            payload.sub
+        )
+        .then(user => {
+            if(!user){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } else if(user.home_id == null ){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } 
+
+            return TasksService.getTasksFromHome(req.app.get('db'), user.home_id)
             .then(tasks => {
                 if(tasks.length < 1){
                     return res.status(204).end()
                 }
-                res.json(tasks.map(TasksService.serializeTask))
+                res.json(tasks.map(task => TasksService.serializeTask(task)))
             })
-            .catch(next)
+        })
+        .catch(next)
     })
     .post(jsonBodyParser, (req, res, next) => {
         const { task_name, assignee_id, home_id } = req.body
@@ -46,6 +71,41 @@ tasksRouter
     })
 
     tasksRouter
+        .route('/own')
+        .all(requireAuthUserHome)
+        .get((req, res, next) => {
+            const authToken = req.get('Authorization') || ''
+    
+            let bearerToken
+            if(!authToken.toLowerCase().startsWith('bearer ')) {
+                return res.status(401).json({ error: 'Missing bearer token'})
+            } else {
+                bearerToken = authToken.slice(7, authToken.length)
+            }
+    
+            const payload = AuthService.verifyJwt(bearerToken)
+    
+            AuthService.getUserWithEmail(
+                req.app.get('db'), 
+                payload.sub
+            )
+            .then(user => {
+                if(!user){
+                    return res.status(401).json({ error: 'Unauthorized request' })
+                }
+    
+                return TasksService.getTasksFromUser(req.app.get('db'), user.id)
+                .then(tasks => {
+                    if(tasks.length < 1){
+                        return res.status(204).end()
+                    }
+                    res.json(tasks.map(task => TasksService.serializeTask(task)))
+                })
+            })
+            .catch(next)
+        })
+
+    tasksRouter
         .route('/:id')
         .all(requireAuthUserHome)
         .all((req, res, next) => {
@@ -60,8 +120,29 @@ tasksRouter
                     })
                 }
 
-                res.task = task
-                next()
+                const authToken = req.get('Authorization') || ''
+    
+                let bearerToken
+                if(!authToken.toLowerCase().startsWith('bearer ')) {
+                    return res.status(401).json({ error: 'Missing bearer token'})
+                } else {
+                    bearerToken = authToken.slice(7, authToken.length)
+                }
+    
+                const payload = AuthService.verifyJwt(bearerToken)
+                AuthService.getUserWithEmail(
+                    req.app.get('db'), 
+                    payload.sub
+                    )
+                    .then(user => {
+                        if(user.home_id !== task.home_id){
+                            return res.status(401).json({ error: 'Unauthorized request'})
+                        } else {
+                            res.task = task
+                            next()
+                        }
+                    }
+                    )
             })
             .catch(next)
         })

@@ -66,7 +66,7 @@ const TasksService = {
         return db
             .from('choretastic_tasks')
             .select('*')
-            .where(home_id)
+            .where('home_id', home_id)
     }
 }
 
