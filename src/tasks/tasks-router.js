@@ -45,28 +45,53 @@ tasksRouter
         .catch(next)
     })
     .post(jsonBodyParser, (req, res, next) => {
-        const { task_name, assignee_id, home_id } = req.body
+        const { task_name, assignee_id } = req.body
         const points = parseInt(req.body.points)
-        const newTask = {task_name, assignee_id, home_id, points}
+        const newTask = {task_name, assignee_id, points}
 
-        for (const field of ['task_name', 'assignee_id', 'home_id', 'points']){
+        for (const field of ['task_name', 'assignee_id', 'points']){
             if(!req.body[field]){
                 return res.status(400).json({
                     error: `Missing '${field}' in request body`
                 })
             }
         }
-            
-        TasksService.insertTask(
-            req.app.get('db'),
-            newTask
+
+        const authToken = req.get('Authorization') || ''
+
+        let bearerToken
+        if(!authToken.toLowerCase().startsWith('bearer ')) {
+            return res.status(401).json({ error: 'Missing bearer token'})
+        } else {
+            bearerToken = authToken.slice(7, authToken.length)
+        }
+
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithEmail(
+            req.app.get('db'), 
+            payload.sub
         )
-        .then(task => {
-            res
-                .status(201)
-                .location(path.posix.join(req.originalUrl, `/${task.id}`))
-                .json(TasksService.serializeTask(task))
-            })
+        .then( user => {
+            if(!user){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } else if(user.home_id == null ){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            }
+
+            newTask.home_id = user.home_id
+
+            TasksService.insertTask(
+                req.app.get('db'),
+                newTask
+            )
+            .then(task => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${task.id}`))
+                    .json(TasksService.serializeTask(task))
+                })
+        })
         .catch(next)
     })
 
