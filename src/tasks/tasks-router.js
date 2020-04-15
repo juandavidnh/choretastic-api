@@ -204,7 +204,7 @@ tasksRouter
                 updatedTask
             )
             .then(() => {
-                res.status(204).end()
+                res.status(200).json('OK')
             })
             .catch(next)
 

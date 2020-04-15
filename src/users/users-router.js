@@ -166,30 +166,53 @@ usersRouter
             req.app.get('db'),
             req.params.id
         )
-            .then(user => {
-                if(!user){
-                    return res.status(400).json({
-                        error: {message: `User doesn't exist`}
-                    })
+        .then(user => {
+            if(!user) {
+                return res.status(404).json({
+                    error: {message: `User doesn't exist`}
+                })
+            }
+
+            const authToken = req.get('Authorization') || ''
+
+            let bearerToken
+            if(!authToken.toLowerCase().startsWith('bearer ')) {
+                return res.status(401).json({ error: 'Missing bearer token'})
+            } else {
+                bearerToken = authToken.slice(7, authToken.length)
+            }
+
+            const payload = AuthService.verifyJwt(bearerToken)
+
+            AuthService.getUserWithEmail(
+                req.app.get('db'), 
+                payload.sub
+                )
+                .then(myUser => {
+                    if(myUser.home_id !== user.home_id){
+                        return res.status(401).json({ error: 'Unauthorized request'})
+                    } else {
+                        res.user = user
+                        next()
+                    }
                 }
-                res.user = user;
-                next();
-            })
-            .catch(next)
+                )
+        })
     })
     .get((req, res, next) => {
         res.json(UsersService.serializeUser(res.user))
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const { email, password, first_name, last_name, nickname, home_id } = req.body
+        const { email, password, first_name, last_name, nickname, home_id, points } = req.body
 
-        const passwordError = UsersService.validatePassword(password)
+        if(password){
+            const passwordError = UsersService.validatePassword(password)
 
-        if(passwordError){
-            return res.status(400).json({error: passwordError})
-        }
+            if(passwordError){
+                return res.status(400).json({error: passwordError})
+            }
 
-        UsersService.hashPassword(password)
+            UsersService.hashPassword(password)
             .then(hashedPassword => {
                 const updateToUser = {
                     email,
@@ -197,7 +220,8 @@ usersRouter
                     first_name,
                     last_name,
                     nickname,
-                    home_id
+                    home_id,
+                    points: parseInt(points)
                 }
 
                 const numberOfValues = Object.values(updateToUser).filter(Boolean).length
@@ -215,10 +239,39 @@ usersRouter
                     updateToUser
                 )
                 .then(() => {
-                    res.status(204).end()
+                    res.status(200).json('OK')
                 })
             })
             .catch(next)
+        }
+
+        const updateToUser = {
+            email,
+            first_name,
+            last_name,
+            nickname,
+            home_id,
+            points: parseInt(points)
+        }
+
+        const numberOfValues = Object.values(updateToUser).filter(Boolean).length
+        if(numberOfValues === 0) {
+            return res.status(400).json({
+            error: {
+                message: `Request must contain at least one value to update`
+                }
+            })
+        }
+
+        return UsersService.updateUser(
+            req.app.get('db'),
+            req.params.id,
+            updateToUser
+        )
+        .then(() => {
+            res.status(204).end()
+        })
+
     })
 
 usersRouter
