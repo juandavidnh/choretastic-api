@@ -45,6 +45,65 @@ usersRouter
     })
 
 usersRouter
+    .route('/add-user')
+    .all(requireAuthUserHome)
+    .post(jsonBodyParser, (req, res, next) => {
+        const { first_name, last_name, nickname, email, password } = req.body
+        const newUser = { first_name, last_name, nickname, email, password }
+
+        for (const field of ['first_name', 'last_name', 'email', 'password']){
+            if(!req.body[field]){
+                return res.status(400).json({
+                    error: `Missing '${field}' in request body`
+                })
+            }
+        }
+
+        const passwordError = UsersService.validatePassword(password)
+
+        if(passwordError){
+            return res.status(400).json({error: passwordError})
+        }
+
+        const authToken = req.get('Authorization') || ''
+
+        let bearerToken
+        if(!authToken.toLowerCase().startsWith('bearer ')) {
+            return res.status(401).json({ error: 'Missing bearer token'})
+        } else {
+            bearerToken = authToken.slice(7, authToken.length)
+        }
+
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithEmail(
+            req.app.get('db'), 
+            payload.sub
+        )
+        .then( user => {
+            if(!user){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            } else if(user.home_id == null ){
+                return res.status(401).json({ error: 'Unauthorized request' })
+            }
+
+            newUser.home_id = user.home_id
+
+            UsersService.insertUser(
+                req.app.get('db'),
+                newUser
+            )
+            .then(user => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                    .json(UsersService.serializeUser(user))
+                })
+        })
+        .catch(next)
+    })
+
+usersRouter
     .route('/')
     .post(jsonBodyParser, (req, res, next) => {
         const { email, password, first_name, last_name, nickname } = req.body
@@ -100,7 +159,7 @@ usersRouter
     })
 
 usersRouter
-    .route('/:id')
+    .route('/user-id/:id')
     .all(requireAuthUserOnly)
     .all((req, res, next) => {
         UsersService.getById(
@@ -163,7 +222,7 @@ usersRouter
     })
 
 usersRouter
-    .route('/:id')
+    .route('/user-id/:id')
     .all(requireAuthUserHome)
     .all((req, res, next) => {
         UsersService.getById(
