@@ -37,7 +37,7 @@ tasksRouter
             return TasksService.getTasksFromHome(req.app.get('db'), user.home_id)
             .then(tasks => {
                 if(tasks.length < 1){
-                    return res.status(204).end()
+                    return res.status(200).json("Enter your first task")
                 }
                 res.json(tasks.map(task => TasksService.serializeTask(task)))
             })
@@ -122,7 +122,7 @@ tasksRouter
                 return TasksService.getTasksFromUser(req.app.get('db'), user.id)
                 .then(tasks => {
                     if(tasks.length < 1){
-                        return res.status(204).end()
+                        return res.status(200).json("Enter your first task")
                     }
                     res.json(tasks.map(task => TasksService.serializeTask(task)))
                 })
@@ -180,7 +180,7 @@ tasksRouter
                 req.params.id
             )
             .then(() => {
-                res.status(204).end()
+                res.status(200).json('OK')
             })
             .catch(next)
         })

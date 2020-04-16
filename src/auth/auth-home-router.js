@@ -1,5 +1,6 @@
 const express = require('express')
 const AuthService = require('./auth-service')
+const HomesService = require('../homes/homes-service')
 
 const authHomeRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -36,7 +37,7 @@ authHomeRouter
                         })
                     }
 
-                    res.status(204).end()
+                    res.send(HomesService.serializeHome(dbHome))
                 })
         })
         .catch(next)

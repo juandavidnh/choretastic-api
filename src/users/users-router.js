@@ -104,7 +104,7 @@ usersRouter
     })
 
 usersRouter
-    .route('/')
+    .route('/sign-up')
     .post(jsonBodyParser, (req, res, next) => {
         const { email, password, first_name, last_name, nickname } = req.body
 
@@ -115,7 +115,7 @@ usersRouter
                 })
             }
         }
-
+        
         const passwordError = UsersService.validatePassword(password)
 
         if(passwordError){
@@ -146,10 +146,14 @@ usersRouter
                                 newUser
                             )
                                 .then(user => {
-                                    res
-                                        .status(201)
-                                        .location(path.posix.join(req.originalUrl, `/${user.id}`))
-                                        .json(UsersService.serializeUser(user))
+                                    const sub = user.email
+                                    const payload = {
+                                        user_id: user.id
+                                    }
+
+                                    res.send({
+                                        authToken: AuthService.createJwt(sub, payload)
+                                    })
                                 })
                         })
                 }
@@ -220,8 +224,8 @@ usersRouter
                     first_name,
                     last_name,
                     nickname,
-                    home_id,
-                    points: parseInt(points)
+                    home_id: home_id,
+                    points: points
                 }
 
                 const numberOfValues = Object.values(updateToUser).filter(Boolean).length
@@ -250,8 +254,8 @@ usersRouter
             first_name,
             last_name,
             nickname,
-            home_id,
-            points: parseInt(points)
+            home_id: home_id,
+            points: points
         }
 
         const numberOfValues = Object.values(updateToUser).filter(Boolean).length
@@ -269,29 +273,10 @@ usersRouter
             updateToUser
         )
         .then(() => {
-            res.status(204).end()
+            res.status(200).json('OK')
         })
+        .catch(next)
 
-    })
-
-usersRouter
-    .route('/user-id/:id')
-    .all(requireAuthUserHome)
-    .all((req, res, next) => {
-        UsersService.getById(
-            req.app.get('db'),
-            req.params.id
-        )
-            .then(user => {
-                if(!user){
-                    return res.status(400).json({
-                        error: {message: `User doesn't exist`}
-                    })
-                }
-                res.user = user;
-                next();
-            })
-            .catch(next)
     })
     .delete((req, res, next) => {
         UsersService.deleteUser(
@@ -303,6 +288,39 @@ usersRouter
             })
             .catch(next)
     })
+
+    usersRouter
+    .route('/own')
+    .all(requireAuthUserOnly)
+    .all((req, res, next) => {
+        const authToken = req.get('Authorization') || ''
+
+        let bearerToken
+        if(!authToken.toLowerCase().startsWith('bearer ')) {
+            return res.status(401).json({ error: 'Missing bearer token'})
+        } else {
+            bearerToken = authToken.slice(7, authToken.length)
+        }
+
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithEmail(
+            req.app.get('db'), 
+            payload.sub
+            )
+            .then(myUser => {
+                if(!myUser){
+                    return res.status(401).json({ error: 'User not found' })
+                }
+                res.user = myUser
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        res.json(UsersService.serializeUser(res.user))
+    })
+
 
 
 module.exports = usersRouter
