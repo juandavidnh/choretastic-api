@@ -21,9 +21,9 @@ homesRouter
     })
 
 homesRouter
-    .route('/')
+    .route('/add-home')
     .all(requireAuthUserOnly)
-    .post(jsonBodyParser, (req, res, next) => {
+    .post( jsonBodyParser, (req, res, next) => {
         const { home_name, password } = req.body
 
         for (const field of ['home_name', 'password']){

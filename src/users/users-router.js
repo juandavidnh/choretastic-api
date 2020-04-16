@@ -289,7 +289,7 @@ usersRouter
             .catch(next)
     })
 
-    usersRouter
+usersRouter
     .route('/own')
     .all(requireAuthUserOnly)
     .all((req, res, next) => {
