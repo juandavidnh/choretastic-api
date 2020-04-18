@@ -2,7 +2,7 @@
 function makeUsersArray() {
     return [
         {
-            "id": 1,
+            //"id": 1,
             "email": "jd@choretastic.com",
             "password": "jd-password",
             "first_name": "Juan David",
@@ -13,7 +13,7 @@ function makeUsersArray() {
             "date_created": "2020-04-18T18:57:54.111Z"
         },
         {
-            "id": 2,
+            //"id": 2,
             "email": "ivanka@choretastic.com",
             "password": "ivanka-password",
             "first_name": "Ivanna",
@@ -24,7 +24,7 @@ function makeUsersArray() {
             "date_created": "2020-04-18T18:57:54.111Z"
         },
         {
-            "id": 3,
+            //"id": 3,
             "email": "mashua@choretastic.com",
             "password": "mashua-password",
             "first_name": "Mashua",
@@ -35,7 +35,7 @@ function makeUsersArray() {
             "date_created": "2020-04-18T18:57:54.111Z"
         },
         {
-            "id": 4,
+            //"id": 4,
             "email": "lilili@choretastic.com",
             "password": "lilili-password",
             "first_name": "Capuli",
@@ -46,7 +46,7 @@ function makeUsersArray() {
             "date_created": "2020-04-18T18:57:54.111Z"
         },
         {
-            "id": 5,
+            //"id": 5,
             "email": "pimienka@choretastic.com",
             "password": "pimienka-password",
             "first_name": "Pimienka",
@@ -57,7 +57,7 @@ function makeUsersArray() {
             "date_created": "2020-04-18T18:57:54.111Z"
         },
         {
-            "id": 6,
+            //"id": 6,
             "email": "mashuo@choretastic.com",
             "password": "mashuo-password",
             "first_name": "Mashuo",

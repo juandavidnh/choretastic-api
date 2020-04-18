@@ -89,7 +89,7 @@ usersRouter
 
             newUser.home_id = user.home_id
 
-            UsersService.insertUser(
+            return UsersService.insertUser(
                 req.app.get('db'),
                 newUser
             )
