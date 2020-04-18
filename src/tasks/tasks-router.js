@@ -2,7 +2,6 @@ const express = require('express')
 const path = require('path')
 const TasksService = require('./tasks-service')
 const AuthService = require('../auth/auth-service')
-const UsersService = require('../users/users-service')
 const { requireAuthUserHome } = require('../middleware/jwt-auth-user')
 
 const tasksRouter = express.Router()

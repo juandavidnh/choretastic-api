@@ -73,74 +73,84 @@ function makeUsersArray() {
 function makeTasksArray() {
     return [
         {
-            "id": "1",
+            //"id": "1",
             "task_name": "Clean bathroom",
             "points": 7,
-            "assignee_id": "1",
-            "status": "pending"
+            "assignee_id": 1,
+            "status": "pending",
+            "home_id": 1
         },
         {
-            "id": "2",
+            //"id": "2",
             "task_name": "Feed cats",
             "points": 3,
-            "assignee_id": "2",
-            "status": "pending" 
+            "assignee_id": 2,
+            "status": "pending",
+            "home_id": 1 
         },
         {
-            "id": "3",
+            //"id": "3",
             "task_name": "Clean litter",
             "points": 7,
-            "assignee_id": "3",
-            "status": "pending"
+            "assignee_id": 3,
+            "status": "pending",
+            "home_id": 1 
         },
         {
-            "id": "4",
+            //"id": "4",
             "task_name": "Wash car",
             "points": 6,
-            "assignee_id": "1",
-            "status": "pending"
+            "assignee_id": 1,
+            "status": "pending",
+            "home_id": 1 
         },
         {
-            "id": "5",
+            //"id": "5",
             "task_name": "Vacuum",
             "points": 8,
-            "assignee_id": "2",
-            "status": "pending"
+            "assignee_id": 2,
+            "status": "pending",
+            "home_id": 1
         },
         {
-            "id": "6",
+            //"id": "6",
             "task_name": "Make breakfast",
             "points": 6,
-            "assignee_id": "4",
-            "status": "pending"
+            "assignee_id": 4,
+            "status": "pending",
+            "home_id": 2
         }, 
         {
-            "id": "7",
+            //"id": "7",
             "task_name": "Take out trash",
             "points": 3,
-            "assignee_id": "5",
-            "status": "pending"
+            "assignee_id": 5,
+            "status": "pending",
+            "home_id": 2
         },
         {
-            "id": "8",
+            //"id": "8",
             "task_name": "Wash dishes",
             "points": 7,
-            "assignee_id": "6",
-            "status": "pending"
+            "assignee_id": 6,
+            "status": "pending",
+            "home_id": 2
         },
         {
-            "id": "9",
+            //"id": "9",
             "task_name": "Clean toilets",
             "points": 8,
-            "assignee_id": "4",
-            "status": "pending"
+            "assignee_id": 4,
+            "status": "pending",
+            "home_id": 2
         }, 
         {
-            "id": "10",
+            //"id": "10",
             "task_name": "Make bed",
             "points": 3,
-            "assignee_id": "5",
-            "status": "pending"
+            "assignee_id": 5,
+            "status": "pending",
+            "home_id": 2
         }
     ]
 }
