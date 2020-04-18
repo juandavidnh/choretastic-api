@@ -158,12 +158,12 @@ function makeTasksArray() {
 function makeHomesArray() {
     return [
         {
-            "id": "1",
+            //"id": "1",
             "password": "gatos-password",
             "home_name": "Los Gatos"
         },
         {
-            "id": "2",
+            //"id": "2",
             "password": "perros-password",
             "home_name": "Los Perros"
         }
