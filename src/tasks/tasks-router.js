@@ -10,6 +10,7 @@ const jsonBodyParser = express.json()
 tasksRouter
     .route('/')
     .all(requireAuthUserHome)
+    //get task list
     .get((req, res, next) => {
         const authToken = req.get('Authorization') || ''
 
@@ -33,6 +34,7 @@ tasksRouter
                 return res.status(401).json({ error: 'Unauthorized request' })
             } 
 
+            //filter out tasks that don't belong to user's home
             return TasksService.getTasksFromHome(req.app.get('db'), user.home_id)
             .then(tasks => {
                 if(tasks.length < 1){
@@ -43,11 +45,13 @@ tasksRouter
         })
         .catch(next)
     })
+    //add new task
     .post(jsonBodyParser, (req, res, next) => {
         const { task_name, assignee_id } = req.body
         const points = parseInt(req.body.points)
         const newTask = {task_name, assignee_id, points}
 
+        //task_name, assignee_id, and points are required
         for (const field of ['task_name', 'assignee_id', 'points']){
             if(!req.body[field]){
                 return res.status(400).json({
@@ -56,6 +60,7 @@ tasksRouter
             }
         }
 
+        //get user from token
         const authToken = req.get('Authorization') || ''
 
         let bearerToken
@@ -78,8 +83,10 @@ tasksRouter
                 return res.status(401).json({ error: 'Unauthorized request' })
             }
 
+            //assign task to user's home
             newTask.home_id = user.home_id
 
+            //insert task
             TasksService.insertTask(
                 req.app.get('db'),
                 newTask
@@ -94,8 +101,10 @@ tasksRouter
         .catch(next)
     })
 
+    //get own tasks only
     tasksRouter
         .route('/own')
+        //require user and home validation
         .all(requireAuthUserHome)
         .get((req, res, next) => {
             const authToken = req.get('Authorization') || ''
@@ -108,7 +117,8 @@ tasksRouter
             }
     
             const payload = AuthService.verifyJwt(bearerToken)
-    
+            
+            //get user's email from token
             AuthService.getUserWithEmail(
                 req.app.get('db'), 
                 payload.sub
@@ -117,7 +127,8 @@ tasksRouter
                 if(!user){
                     return res.status(401).json({ error: 'Unauthorized request' })
                 }
-    
+                
+                //get tasks from logged in user
                 return TasksService.getTasksFromUser(req.app.get('db'), user.id)
                 .then(tasks => {
                     if(tasks.length < 1){
@@ -131,8 +142,10 @@ tasksRouter
 
     tasksRouter
         .route('/:id')
+        //require user with home authentication
         .all(requireAuthUserHome)
         .all((req, res, next) => {
+            //search specific task 
             TasksService.getById(
                 req.app.get('db'),
                 req.params.id
@@ -159,6 +172,7 @@ tasksRouter
                     payload.sub
                     )
                     .then(user => {
+                        //if task doesn't belong to logged in user, reject request
                         if(user.home_id !== task.home_id){
                             return res.status(401).json({ error: 'Unauthorized request'})
                         } else {
@@ -171,6 +185,7 @@ tasksRouter
             .catch(next)
         })
         .get((req, res, next) => {
+            //return task object
             res.json(TasksService.serializeTask(res.task))
         })
         .delete((req, res, next) => {

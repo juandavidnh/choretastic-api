@@ -5,11 +5,13 @@ const HomesService = require('../homes/homes-service')
 const authHomeRouter = express.Router()
 const jsonBodyParser = express.json()
 
+//validate if home access credentials are correct
 authHomeRouter
     .post('/login', jsonBodyParser, (req, res, next) => {
         const { home_name, password } = req.body
         const loginHome = { home_name, password }
 
+        //home_name and password are required
         for(const [key, value] of Object.entries(loginHome)) {
             if(value == null){
                 return res.status(400).json({
@@ -18,6 +20,7 @@ authHomeRouter
             }
         }
 
+        //get home information from database
         AuthService.getHomeWithHomeName(
             req.app.get('db'),
             loginHome.home_name
@@ -29,6 +32,7 @@ authHomeRouter
                 })
             }
 
+            //if home found compare input password with db password
             return AuthService.comparePasswords(loginHome.password, dbHome.password)
                 .then(compareMatch => {
                     if(!compareMatch) {
@@ -37,6 +41,7 @@ authHomeRouter
                         })
                     }
 
+                    //return home object
                     res.send(HomesService.serializeHome(dbHome))
                 })
         })

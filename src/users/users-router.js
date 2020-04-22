@@ -8,6 +8,7 @@ const usersRouter = express.Router()
 const jsonBodyParser = express.json()
 
 usersRouter
+    //get user list
     .route('/')
     .all(requireAuthUserHome)
     .get((req, res, next) => {
@@ -33,6 +34,7 @@ usersRouter
                 return res.status(401).json({ error: 'Unauthorized request' })
             } 
 
+            //filter only users from user's home
             return UsersService.getUsersFromHome(req.app.get('db'), user.home_id)
             .then(users => {
                 if(users.length < 1){
@@ -45,12 +47,14 @@ usersRouter
     })
 
 usersRouter
+    //add user to user's home
     .route('/add-user')
     .all(requireAuthUserHome)
     .post(jsonBodyParser, (req, res, next) => {
         const { first_name, last_name, nickname, email, password } = req.body
         const newUser = { first_name, last_name, nickname, email, password }
 
+        //require first_name, last_name, email, and password
         for (const field of ['first_name', 'last_name', 'email', 'password']){
             if(!req.body[field]){
                 return res.status(400).json({
@@ -59,6 +63,7 @@ usersRouter
             }
         }
 
+        //verify if password satisfies conditions
         const passwordError = UsersService.validatePassword(password)
 
         if(passwordError){
@@ -76,6 +81,7 @@ usersRouter
 
         const payload = AuthService.verifyJwt(bearerToken)
 
+        //payload.sub should be an email of a user within database
         AuthService.getUserWithEmail(
             req.app.get('db'), 
             payload.sub
@@ -87,8 +93,10 @@ usersRouter
                 return res.status(401).json({ error: 'Unauthorized request' })
             }
 
+            //assign logged in user's home_id to new user
             newUser.home_id = user.home_id
 
+            //add new user
             return UsersService.insertUser(
                 req.app.get('db'),
                 newUser
@@ -104,10 +112,12 @@ usersRouter
     })
 
 usersRouter
+    //sign up new user
     .route('/sign-up')
     .post(jsonBodyParser, (req, res, next) => {
         const { email, password, first_name, last_name, nickname } = req.body
 
+        //require first_name, last_name, email, and password
         for (const field of ['email', 'password', 'first_name', 'last_name']){
             if(!req.body[field]){
                 return res.status(400).json({
@@ -116,12 +126,14 @@ usersRouter
             }
         }
         
+        //verify if password satisfies conditions
         const passwordError = UsersService.validatePassword(password)
 
         if(passwordError){
             return res.status(400).json({error: passwordError})
         }
 
+        //user should not be in database
         UsersService.hasUserWithEmail(
             req.app.get('db'),
             email
@@ -130,6 +142,7 @@ usersRouter
                 if(hasUserWithEmail){
                     return res.status(400).json({error: `User already exists, try signing in`})
                 } else {
+                    //encrypt user's password
                     return UsersService.hashPassword(password)
                         .then(hashedPassword => {
                             const newUser = {
@@ -141,6 +154,7 @@ usersRouter
                                 date_created: 'now()',
                             }
 
+                            //add new user and generate jwt token
                             return UsersService.insertUser(
                                 req.app.get('db'),
                                 newUser
@@ -164,8 +178,10 @@ usersRouter
 
 usersRouter
     .route('/user-id/:id')
+    //require auth user without home
     .all(requireAuthUserOnly)
     .all((req, res, next) => {
+        //verify if user exists
         UsersService.getById(
             req.app.get('db'),
             req.params.id
@@ -193,6 +209,7 @@ usersRouter
                 payload.sub
                 )
                 .then(myUser => {
+                    //deny request if user doesn't belong to same home
                     if(myUser.home_id !== user.home_id){
                         return res.status(401).json({ error: 'Unauthorized request'})
                     } else {
@@ -289,6 +306,7 @@ usersRouter
             .catch(next)
     })
 
+//get own user object
 usersRouter
     .route('/own')
     .all(requireAuthUserOnly)
@@ -302,6 +320,7 @@ usersRouter
             bearerToken = authToken.slice(7, authToken.length)
         }
 
+        //extract user from token
         const payload = AuthService.verifyJwt(bearerToken)
 
         AuthService.getUserWithEmail(
@@ -318,6 +337,7 @@ usersRouter
             .catch(next)
     })
     .get((req, res, next) => {
+        //return user object
         res.json(UsersService.serializeUser(res.user))
     })
 
