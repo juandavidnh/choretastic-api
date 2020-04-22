@@ -1,17 +1,79 @@
-# Express Boilerplate!
+# Choretastic API
 
-This is a boilerplate project used for starting new projects!
+## Summary
 
-## Set up
+Choretastic is a web app that allows users to organize their household's chores among members of their family. Each task will confer a certain number of points to the user who completes it.
+There will be a scoreboard with each user's points ordered from highest to lowest.
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+## Base URL
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+The base url to access our API is [https://fathomless-sands-27164.herokuapp.com/](https://fathomless-sands-27164.herokuapp.com/)
+
+## Authentication
+
+In order to interact with the database you'll need a valid user token passed through Header.
+
+## Endpoints
+
+### /api/users
+
+Use this endpoint to interact with the users table.
+
+#### GET /api/users/
+
+Gets all users that belong to the user's home.
+
+Response example:
+```javascript
+
+[
+    {
+        "id": 21,
+        "first_name": "jalo",
+        "last_name": "mas",
+        "nickname": "jalon",
+        "email": "jal@choretastic.com",
+        "password": "$2a$12$6BYF5cBtMIDawJW8pVHHwO3q7W1I3i..7l0zDKPL5SQ4QL9JZM8eG",
+        "points": 0,
+        "home_id": 6,
+        "date_created": "2020-04-17T01:43:09.601Z"
+    },
+    {
+        "id": 23,
+        "first_name": "pacos feaas",
+        "last_name": "llatas",
+        "nickname": "",
+        "email": "jd@nunununbunu.com",
+        "password": "CODfin235!",
+        "points": 0,
+        "home_id": 6,
+        "date_created": "2020-04-18T19:39:10.654Z"
+    },
+    {
+        "id": 25,
+        "first_name": "pacos feaas",
+        "last_name": "llatas",
+        "nickname": "",
+        "email": "jd@hdisahudisahodsaho.com",
+        "password": "CODfin235!",
+        "points": 0,
+        "home_id": 6,
+        "date_created": "2020-04-18T19:53:21.363Z"
+    },
+    {
+        "id": 26,
+        "first_name": "pacos feaas",
+        "last_name": "llatas",
+        "nickname": "",
+        "email": "jd@dsa.com",
+        "password": "CODfin235!",
+        "points": 0,
+        "home_id": 6,
+        "date_created": "2020-04-18T21:43:57.008Z"
+    }
+]
+
+```
 
 ## Scripts
 
